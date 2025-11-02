@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enhanced 2-Tier App Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀Dashboard</h1>
+            <p>Modern 2-Tier Application with Interactive Features</p>
+        </div>
+
+        <div class="dashboard">
+            <!-- Message Section -->
+            <div class="card">
+                <h2>📨 Backend Communication</h2>
+                <button class="btn" onclick="fetchMessage()">Get Message</button>
+                <button class="btn btn-secondary" onclick="fetchQuote()">Get Random Quote</button>
+                <div class="loading" id="messageLoading">
+                    <div class="spinner"></div>
+                </div>
+                <div id="messageOutput" class="data-display"></div>
+            </div>
+
+            <!-- User Management -->
+            <div class="card">
+                <h2>👥 User Management</h2>
+                <button class="btn" onclick="fetchUsers()">Load Users</button>
+                <div class="loading" id="usersLoading">
+                    <div class="spinner"></div>
+                </div>
+                <div id="usersOutput" class="data-display"></div>
+                
+                <h3 style="margin-top: 20px;">Add New User</h3>
+                <div class="form-group">
+                    <label>Name:</label>
+                    <input type="text" id="userName" placeholder="Enter name">
+                </div>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="userEmail" placeholder="Enter email">
+                </div>
+                <div class="form-group">
+                    <label>Role:</label>
+                    <select id="userRole">
+                        <option value="User">User</option>
+                        <option value="Developer">Developer</option>
+                        <option value="Designer">Designer</option>
+                        <option value="Manager">Manager</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" onclick="createUser()">Create User</button>
+                <div id="userMessage"></div>
+            </div>
+
+            <!-- Task Management -->
+            <div class="card">
+                <h2>📋 Task Management</h2>
+                <button class="btn" onclick="fetchTasks()">Load Tasks</button>
+                <div class="loading" id="tasksLoading">
+                    <div class="spinner"></div>
+                </div>
+                <div id="tasksOutput" class="data-display"></div>
+                
+                <h3 style="margin-top: 20px;">Add New Task</h3>
+                <div class="form-group">
+                    <label>Title:</label>
+                    <input type="text" id="taskTitle" placeholder="Enter task title">
+                </div>
+                <div class="form-group">
+                    <label>Priority:</label>
+                    <select id="taskPriority">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status:</label>
+                    <select id="taskStatus">
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" onclick="createTask()">Create Task</button>
+                <div id="taskMessage"></div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="card">
+                <h2>📊 Statistics</h2>
+                <button class="btn" onclick="fetchStats()">Refresh Stats</button>
+                <div class="loading" id="statsLoading">
+                    <div class="spinner"></div>
+                </div>
+                <div id="statsOutput" class="stats-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
