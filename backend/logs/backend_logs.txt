@@ -1,0 +1,4 @@
+Starting server on 0.0.0.0:5000
+ * Serving Flask app 'app'
+ * Debug mode: on
+Starting server on 0.0.0.0:38085

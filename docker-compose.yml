@@ -1,0 +1,31 @@
+# Simple run command:
+# docker compose up --build
+#
+# Or if images already built:
+# docker compose up
+
+services:
+  backend:
+    build: ./backend
+    container_name: two_tier_backend
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+    # Mount code for easy dev iteration (optional). Remove in production.
+    volumes:
+      - ./backend:/app
+    command: python app.py
+  nginx:
+    image: nginx:latest
+    container_name: nginx_reverse_proxy
+    ports:
+      - "80:80"
+      - "443:443"          # if you add SSL later
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./ssl/certs:/etc/nginx/ssl/certs/btnhd.com.csr:ro
+      - ./ssl/private:/etc/nginx/ssl/private/btnhd.com.key:ro
+    depends_on:
+      - backend
+
