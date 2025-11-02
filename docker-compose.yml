@@ -24,7 +24,8 @@ services:
       - "443:443"          # if you add SSL later
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./ssl/certs:/etc/ssl/certs/btnhd.com.csr:ro
-      - ./ssl/private:/etc/ssl/private/btnhd.com.key:ro
+      - ./ssl/certs:/etc/nginx/ssl/certs/btnhd.com.csr:ro
+      - ./ssl/private:/etc/nginx/ssl/private/btnhd.com.key:ro
     depends_on:
       - backend
+

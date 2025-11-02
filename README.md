@@ -102,3 +102,5 @@ Yes, you can absolutely deploy the frontend to AWS S3 static hosting with CloudF
 - **API Endpoint**: Update `config.js` with your production backend URL before deployment
 - **Cache Invalidation**: After deploying updates, invalidate CloudFront cache for `/index.html` and `/config.js` to ensure users get the latest version
 - **Backend Deployment**: Your backend needs to be publicly accessible and configured to allow requests from your CloudFront domain
+
+**NOTE**: Don't forgrt to add the user of docker hub as collabarator before pushing image in docker hub if you are using it. Thats a stupid mistake.

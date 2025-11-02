@@ -85,19 +85,20 @@ def choose_host_and_port():
     except ValueError:
         desired_port = 5000
 
-    # If desired port is free, use it
+ # Check if desired port is available, if yes, return it    
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.settimeout(0.5)
         if sock.connect_ex((desired_host, desired_port)) != 0:
             return desired_host, desired_port
 
-    # Otherwise, ask OS for a free ephemeral port
+    # If desired port is in use, pick a free ephemeral port from OS
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind((desired_host, 0))
         _, free_port = sock.getsockname()
         return desired_host, free_port
 
 if __name__ == '__main__':
+    # Determine host and port dynamically, allowing Kubernetes to control via env vars
     host, port = choose_host_and_port()
-    print(f"Starting server on {host}:{port}")
-    app.run(host=host, port=port, debug=True)
+    print(f"Starting server on {host}:{port}") # Logs the chosen host and port
+    app.run(host=host, port=port, debug=True) # Starts the flask app on chosen host and port with debug enabled

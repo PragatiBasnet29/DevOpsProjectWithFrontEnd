@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend-container
+        image: docker.io/pragatibasnet29/backend-app:1.0.0
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: backend-config
+        - secretRef:
+            name: backend-secret
+        volumeMounts:
+        - mountPath: /data
+          name: backend-storage
+      volumes:
+      - name: backend-storage
+        persistentVolumeClaim:
+          claimName: backend-pvc
