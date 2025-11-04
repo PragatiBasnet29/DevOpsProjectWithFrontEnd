@@ -4,6 +4,8 @@
 # Or if images already built:
 # docker compose up
 
+version: '3.8'
+
 services:
   backend:
     build: ./backend
@@ -16,6 +18,7 @@ services:
     volumes:
       - ./backend:/app
     command: python app.py
+
   nginx:
     image: nginx:latest
     container_name: nginx_reverse_proxy
@@ -24,8 +27,7 @@ services:
       - "443:443"          # if you add SSL later
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./ssl/certs:/etc/nginx/ssl/certs/btnhd.com.csr:ro
-      - ./ssl/private:/etc/nginx/ssl/private/btnhd.com.key:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
       - backend
 

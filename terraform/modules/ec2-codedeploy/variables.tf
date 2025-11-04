@@ -25,3 +25,8 @@ variable "project_name" {
 variable "env" {
   type = string
 }
+
+variable "allowed_ssh_cidr" {
+  description = "CIDR block allowed to SSH to EC2 (e.g., 1.2.3.4/32)"
+  type        = string
+}

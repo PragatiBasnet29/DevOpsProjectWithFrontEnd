@@ -71,7 +71,7 @@ resource "aws_security_group" "ec2_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["your-ip-address/32"] # Replace with your office/home IP for SSH
+    cidr_blocks = [var.allowed_ssh_cidr]  # Replace with your office/home IP for SSH
   }
 
   egress {

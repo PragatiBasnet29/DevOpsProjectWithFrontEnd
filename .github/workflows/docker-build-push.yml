@@ -1,0 +1,120 @@
+name: Build and Push Docker Image to ECR
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'backend/Dockerfile'
+      - 'backend/**/*.py'
+      - 'backend/requirements.txt'
+      - 'docker-compose.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/Dockerfile'
+      - 'backend/**/*.py'
+      - 'backend/requirements.txt'
+  workflow_dispatch:  # Allows manual triggering
+
+env:
+  AWS_REGION: us-west-2  # Change to your AWS region
+  ECR_REPOSITORY: myapp-backend  # Change to match your ECR repo name (from terraform)
+  
+jobs:
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # Required for OIDC
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActions-ECR-Build
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        id: build-image
+        working-directory: ./backend
+        run: |
+          IMAGE_TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          docker build -t ${{ env.ECR_REPOSITORY }}:$IMAGE_TAG -t ${{ env.ECR_REPOSITORY }}:latest .
+          echo "✅ Docker image built successfully"
+          echo "Image tag: $IMAGE_TAG"
+
+      - name: Save image metadata
+        id: image-metadata
+        run: |
+          IMAGE_TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "COMMIT_SHA=${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "COMMIT_MSG=${{ github.event.head_commit.message }}" >> $GITHUB_OUTPUT
+
+  push-to-ecr:
+    name: Push to ECR (Requires Approval)
+    runs-on: ubuntu-latest
+    needs: build
+    environment: 
+      name: production  # This will require manual approval if configured in GitHub
+      url: https://console.aws.amazon.com/ecr
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActions-ECR-Push
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image for push
+        working-directory: ./backend
+        run: |
+          IMAGE_TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          docker build -t ${{ env.ECR_REPOSITORY }}:$IMAGE_TAG -t ${{ env.ECR_REPOSITORY }}:latest .
+
+      - name: Tag Docker image
+        run: |
+          IMAGE_TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          docker tag ${{ env.ECR_REPOSITORY }}:latest ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+          docker tag ${{ env.ECR_REPOSITORY }}:latest ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+          echo "📦 Tagged image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG"
+
+      - name: Push Docker image to ECR
+        run: |
+          IMAGE_TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          echo "🚀 Pushing image to ECR..."
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+          echo "✅ Successfully pushed image to ECR"
+
+      - name: Output ECR Image URI
+        run: |
+          IMAGE_TAG=$(echo ${{ github.sha }} | cut -c1-7)
+          echo "📦 Image pushed to ECR:"
+          echo "Image URI: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG"
+          echo "Latest URI: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest"
